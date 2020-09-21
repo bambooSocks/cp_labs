@@ -2,3 +2,7 @@
 cp_projects.iml
 
 out/
+
+.idea/
+
+.DS_Store

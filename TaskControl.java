@@ -35,7 +35,7 @@ class Task extends Thread {
     public void run() {
         int cols = tf.getColumns();
 
-        boolean useCPU = false; // Set true to consume CPU-cycles
+        boolean useCPU = true; // Set true to consume CPU-cycles
 
         int basespeed = 5000; // millisecs to do task
         int variation = (useCPU ? 0 : 60); // Speed variation in percent
@@ -45,10 +45,15 @@ class Task extends Thread {
         String s = "";
 
         setMyText(s);
-        WT: while (s.length() < cols) {
+        while (s.length() < cols) {
 
             if (useCPU) {
-                for (int j = 0; j < 1000000 * delay; j++) {
+                for (int j = 0; j < 10000000 * delay; j++) {
+                }
+                if (this.isInterrupted()) {
+                    s = s + "|";
+                    setMyText(s);
+                    break;
                 }
             } else {
                 try {
@@ -56,7 +61,7 @@ class Task extends Thread {
                 } catch (InterruptedException e) {
                     s = s + "|";
                     setMyText(s);
-                    break WT;
+                    break;
                 }
             }
 
@@ -68,7 +73,7 @@ class Task extends Thread {
 
 public class TaskControl {
 
-    static final int N = 6; // Number of Textfields
+    static final int N = 20; // Number of Textfields
 
     static int h = 0; // Number of 'hello'-s
 
