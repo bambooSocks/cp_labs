@@ -32,6 +32,7 @@ class SearchTask implements Callable<List<Integer>> {
     }
 
     public List<Integer> call() {
+//        System.out.println("from: " + from + " to: " + to);
         final int pl = pattern.length;
         List<Integer> result = new LinkedList<Integer>();
 
@@ -159,7 +160,6 @@ public class Search {
 
     static void writeTime(double time) {
         System.out.printf("%1.6f s", time);
-        writeData(String.format("%1.6f", time));
     }
 
     static void writeRun(int no) {
@@ -187,11 +187,11 @@ public class Search {
             
             /* Get and print program parameters */
             getArguments(argv);
-            System.out.printf("\nFile=%s, pattern='%s'\nntasks=%d, nthreads=%d, warmups=%d, runs=%d\n", 
+            System.out.printf("\nFile=%s, pattern='%s'\nntasks=%d, nthreads=%d, warmups=%d, runs=%d\n",
                               fname, new String(pattern), ntasks, nthreads, warmups, runs);
 
             /* Setup execution engine */
-            ExecutorService engine = Executors.newSingleThreadExecutor();
+            ExecutorService engine = Executors.newCachedThreadPool();
 
             /**********************************************
              * Run search using a single task
@@ -257,7 +257,7 @@ public class Search {
 
             // Run the tasks a couple of times
             for (int i = 0; i < warmups; i++) {
-                engine.invokeAll(taskList);
+                List<Future<List<Integer>>> f = engine.invokeAll(taskList);
             }
 
             totalTime = 0.0;
@@ -292,7 +292,7 @@ public class Search {
                 System.out.println("\nERROR: lists differ");
             }
             System.out.printf("\n\nAverage speedup: %1.2f\n\n", singleTime / multiTime);
-
+            writeData(String.format("%d: %f", ntasks, singleTime / multiTime));
 
             /**********************************************
              * Terminate engine after use
@@ -300,7 +300,7 @@ public class Search {
             engine.shutdown();
 
         } catch (Exception e) {
-            System.out.println("ass1.Search: " + e);
+            System.out.println("Search: " + e);
         }
     }
 }
