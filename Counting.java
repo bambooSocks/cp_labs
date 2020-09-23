@@ -1,7 +1,7 @@
  
 public class Counting {
 
-    static final int N = 10000;
+    static final int N = 1000;
 
     static volatile int x = 0;
 
