@@ -248,7 +248,7 @@ public class Search {
                 }
 
                 // add a new task to the list
-                taskList.add(new SearchTask(text, pattern, idx, endIdx + pattern.length ));
+                taskList.add(new SearchTask(text, pattern, idx, endIdx + pattern.length - 1));
 
                 idx = endIdx + 1;
             }
