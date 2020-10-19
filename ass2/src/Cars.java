@@ -1,4 +1,4 @@
-package ass2;//Implementation of Graphical User Interface class
+//Implementation of Graphical User Interface class
 //Mandatory assignment 2
 //Course 02158 Concurrent Programming, DTU, Fall 2020
 

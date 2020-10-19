@@ -1,4 +1,4 @@
-package ass2;//Implementation of classical, Dijkstra Semaphore
+//Implementation of classical, Dijkstra Semaphore
 //Weakly Fair
 
 //Course 02220 Concurrent Programming

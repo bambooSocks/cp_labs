@@ -1,4 +1,4 @@
-package ass2;//Specification of Car interface
+//Specification of Car interface 
 //Mandatory assignment 2
 //Course 02158 Concurrent Programming, DTU, Fall 2020
 
