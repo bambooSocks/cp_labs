@@ -1,0 +1,47 @@
+#define P(X) atomic{ X > 0 -> X-- }
+#define V(X) atomic{ X++ }
+#define BOTTOM(X) ( X <= 2 )
+#define TOP(X) ( X >= 3 )
+
+pid up1, up2, down1, down2;
+byte downwardsMutex, alleyMutex, counterMutex, counter;
+bool dir, isFirst, isFirstDownwards;
+
+proctype Car(byte no) {
+	/*ENTER*/
+	do :: 	
+		bool isOppositeDir = (no < 5) != dir;
+		if :: isOppositeDir -> 
+			atomic { isFirstDownwards = isFirst && (no < 5) };
+			if 
+			:: isFirstDownwards ->
+				atomic { isFirst = 0 };
+				P(downwardsMutex);
+				P(alleyMutex);
+				V(downwardsMutex)
+			:: no < 5 ->
+				P(downwardsMutex);
+				V(downwardsMutex)
+			:: no > 4 -> P(alleyMutex)
+			fi;
+			dir = no < 5;
+		fi;
+		P(counterMutex);
+		counter = counter + 1;
+		V(counterMutex)		
+	od
+}
+
+
+init {
+	atomic {
+		isFirst = 1;
+		dir = 0;
+	}
+	atomic {
+		up1 = run Car(1);
+		up2 = run Car(2);
+		down1 = run Car(3);
+		down2 = run Car(4)
+	}
+} 

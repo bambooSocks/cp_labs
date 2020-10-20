@@ -6,13 +6,16 @@
 
 public class Alley {
 
-    Semaphore up, down, alley;
+    Semaphore alleyMutex, counterMutex, downwardsMutex, isFirstMutex;
     boolean dir = false;
+    boolean isFirst = true;
+    int counter = 0;
 
     public Alley() {
-        up = new Semaphore(1);
-        down = new Semaphore(1);
-        alley = new Semaphore(4);
+        downwardsMutex = new Semaphore(1);
+        alleyMutex = new Semaphore(1);
+        counterMutex = new Semaphore(1);
+        isFirstMutex = new Semaphore(1);
     }
 
     /* Determine whether pos is right before alley is entered */
@@ -28,28 +31,48 @@ public class Alley {
     /* Block until car no. may enter alley */
     public void enter(int no) throws InterruptedException {
         if (no != 0) {
-            boolean curDir = no < 5;
-            if (curDir == dir) {
-                alley.P();
-            } else {
-                if (curDir) {
-                    down.P();
+            boolean isOppositeDir = no < 5 != dir;
+
+            if (isOppositeDir) {
+                isFirstMutex.P();
+                boolean isFirstDownwards = isFirst && no < 5;
+                isFirstMutex.V();
+
+                if (isFirstDownwards) {
+                    isFirstMutex.P();
+                    isFirst = false;
+                    isFirstMutex.V();
+
+                    downwardsMutex.P();
+                    alleyMutex.P();
+                    downwardsMutex.V();
+                } else if (no < 5) {
+                    downwardsMutex.P();
+                    downwardsMutex.V();
                 } else {
-                    up.P();
+                    alleyMutex.P();
                 }
-                dir = curDir;
+                dir = no < 5;
             }
+
+            counterMutex.P();
+            counter++;
+            counterMutex.V();
         }
     }
 
     /* Register that car no. has left the alley */
-    public void leave(int no) {
-        alley.V();
-
-        if (no < 5) {
-            down.V();
-        } else {
-            up.V();
+    public void leave(int no) throws InterruptedException {
+        if (no != 0) {
+            counterMutex.P();
+            counter--;
+            if (counter == 0) {
+                alleyMutex.V();
+                if (no < 5) {
+                    isFirst = true;
+                }
+            };
+            counterMutex.V();
         }
     }
 
