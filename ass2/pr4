@@ -1,34 +1,54 @@
 #define P(X) atomic{ X > 0 -> X-- }
 #define V(X) atomic{ X++ }
-#define BOTTOM(X) ( X <= 2 )
-#define TOP(X) ( X >= 3 )
+#define DOWNWARD(X) ( X <= 2 )
+#define UPWARD(X) ( X >= 3 )
 
-pid up1, up2, down1, down2;
-byte downwardsMutex, alleyMutex, counterMutex, counter;
-bool dir, isFirst, isFirstDownwards;
+pid downward1, downward2, upward1, upward2;
+byte downwardsMutex, alleyMutex, counterMutex, isFirstMutex, counter;
+bool isDirDownward, isFirst, isFirstDownwards;
 
 proctype Car(byte no) {
-	/*ENTER*/
 	do :: 	
-		bool isOppositeDir = (no < 5) != dir;
+		/*ENTER*/
+		bool isOppositeDir = (DOWNWARD(no) != isDirDownward);
 		if :: isOppositeDir -> 
-			atomic { isFirstDownwards = isFirst && (no < 5) };
+			P(isFirstMutex);
+			isFirstDownwards = (isFirst && DOWNWARD(no));
+			V(isFirstMutex);
 			if 
 			:: isFirstDownwards ->
-				atomic { isFirst = 0 };
+                P(isFirstMutex);
+				isFirst = 0;
+                V(isFirstMutex);
+
 				P(downwardsMutex);
 				P(alleyMutex);
 				V(downwardsMutex)
-			:: no < 5 ->
+			:: !isFirstDownwards && DOWNWARD(no) ->
 				P(downwardsMutex);
 				V(downwardsMutex)
-			:: no > 4 -> P(alleyMutex)
+			:: UPWARD(no) -> P(alleyMutex)
 			fi;
-			dir = no < 5;
+			isDirDownward = DOWNWARD(no)
+            :: !isOppositeDir -> skip
 		fi;
 		P(counterMutex);
 		counter = counter + 1;
-		V(counterMutex)		
+		V(counterMutex);
+		/*LEAVE*/
+		P(counterMutex);
+		counter = counter - 1;
+		if :: counter == 0 ->
+			V(alleyMutex);
+			if :: DOWNWARD(no) ->
+				P(isFirstMutex);
+				isFirst = 1;
+				V(isFirstMutex)
+                :: UPWARD(no) -> skip
+			fi
+            :: counter != 0 -> skip
+		fi
+		V(counterMutex)
 	od
 }
 
@@ -36,12 +56,17 @@ proctype Car(byte no) {
 init {
 	atomic {
 		isFirst = 1;
-		dir = 0;
+		isDirDownward = 0;
+		downwardsMutex = 1;
+		alleyMutex = 1;
+		counterMutex = 1;
+		isFirstMutex =1;
+		counter = 0
 	}
 	atomic {
-		up1 = run Car(1);
-		up2 = run Car(2);
-		down1 = run Car(3);
-		down2 = run Car(4)
+		downward1 = run Car(1);
+		downward2 = run Car(2);
+		upward1 = run Car(3);
+		upward2 = run Car(4)
 	}
 } 

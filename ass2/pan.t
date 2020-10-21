@@ -26,86 +26,141 @@ settable(void)
 
 	/* proctype 1: :init: */
 
-	trans[1] = (Trans **) emalloc(10*sizeof(Trans *));
+	trans[1] = (Trans **) emalloc(15*sizeof(Trans *));
 
-	T = trans[ 1][3] = settr(42,2,0,0,0,"ATOMIC", 1, 2, 0);
-	T->nxt	= settr(42,2,1,0,0,"ATOMIC", 1, 2, 0);
-	trans[1][1]	= settr(40,4,8,3,3,"isFirst = 1", 1, 2, 0); /* m: 2 -> 0,8 */
+	T = trans[ 1][8] = settr(81,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(81,2,1,0,0,"ATOMIC", 1, 2, 0);
+	trans[1][1]	= settr(74,4,13,3,3,"isFirst = 1", 1, 2, 0); /* m: 2 -> 0,13 */
 	reached1[2] = 1;
-	trans[1][2]	= settr(0,0,0,0,0,"dir = 0",0,0,0);
-	T = trans[ 1][8] = settr(47,2,0,0,0,"ATOMIC", 1, 2, 0);
-	T->nxt	= settr(47,2,4,0,0,"ATOMIC", 1, 2, 0);
-	trans[1][4]	= settr(43,4,9,4,4,"up1 = run Car(1)", 1, 2, 0); /* m: 5 -> 0,9 */
-	reached1[5] = 1;
-	trans[1][5]	= settr(0,0,0,0,0,"up2 = run Car(2)",0,0,0);
-	trans[1][6]	= settr(0,0,0,0,0,"down1 = run Car(3)",0,0,0);
-	trans[1][7]	= settr(0,0,0,0,0,"down2 = run Car(4)",0,0,0);
-	trans[1][9]	= settr(48,0,0,5,5,"-end-", 0, 3500, 0);
+	trans[1][2]	= settr(0,0,0,0,0,"isDirDownward = 0",0,0,0);
+	trans[1][3]	= settr(0,0,0,0,0,"downwardsMutex = 1",0,0,0);
+	trans[1][4]	= settr(0,0,0,0,0,"alleyMutex = 1",0,0,0);
+	trans[1][5]	= settr(0,0,0,0,0,"counterMutex = 1",0,0,0);
+	trans[1][6]	= settr(0,0,0,0,0,"isFirstMutex = 1",0,0,0);
+	trans[1][7]	= settr(0,0,0,0,0,"counter = 0",0,0,0);
+	T = trans[ 1][13] = settr(86,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(86,2,9,0,0,"ATOMIC", 1, 2, 0);
+	trans[1][9]	= settr(82,4,14,4,4,"downward1 = run Car(1)", 1, 2, 0); /* m: 10 -> 0,14 */
+	reached1[10] = 1;
+	trans[1][10]	= settr(0,0,0,0,0,"downward2 = run Car(2)",0,0,0);
+	trans[1][11]	= settr(0,0,0,0,0,"upward1 = run Car(3)",0,0,0);
+	trans[1][12]	= settr(0,0,0,0,0,"upward2 = run Car(4)",0,0,0);
+	trans[1][14]	= settr(87,0,0,5,5,"-end-", 0, 3500, 0);
 
 	/* proctype 0: Car */
 
-	trans[0] = (Trans **) emalloc(41*sizeof(Trans *));
+	trans[0] = (Trans **) emalloc(75*sizeof(Trans *));
 
-	trans[0][38]	= settr(37,0,37,1,0,".(goto)", 0, 2, 0);
-	T = trans[0][37] = settr(36,0,0,0,0,"DO", 0, 2, 0);
-	    T->nxt	= settr(36,0,1,0,0,"DO", 0, 2, 0);
-	trans[0][1]	= settr(0,0,29,6,6,"isOppositeDir = ((no<5)!=dir)", 1, 2, 0);
-	T = trans[0][29] = settr(28,0,0,0,0,"IF", 0, 2, 0);
-	    T->nxt	= settr(28,0,2,0,0,"IF", 0, 2, 0);
-	trans[0][2]	= settr(1,0,4,7,7,"(isOppositeDir)", 0, 2, 0);
-	T = trans[ 0][4] = settr(3,2,0,0,0,"ATOMIC", 1, 2, 0);
-	T->nxt	= settr(3,2,3,0,0,"ATOMIC", 1, 2, 0);
-	trans[0][3]	= settr(2,0,26,8,8,"isFirstDownwards = (isFirst&&(no<5))", 1, 2, 0);
-	T = trans[0][26] = settr(25,0,0,0,0,"IF", 0, 2, 0);
-	T = T->nxt	= settr(25,0,5,0,0,"IF", 0, 2, 0);
-	T = T->nxt	= settr(25,0,16,0,0,"IF", 0, 2, 0);
-	    T->nxt	= settr(25,0,22,0,0,"IF", 0, 2, 0);
-	trans[0][5]	= settr(4,0,7,9,0,"(isFirstDownwards)", 1, 2, 0);
-	T = trans[ 0][7] = settr(6,2,0,0,0,"ATOMIC", 1, 2, 0);
-	T->nxt	= settr(6,2,6,0,0,"ATOMIC", 1, 2, 0);
-	trans[0][6]	= settr(5,0,10,10,10,"isFirst = 0", 1, 2, 0);
-	T = trans[ 0][10] = settr(9,2,0,0,0,"ATOMIC", 1, 2, 0);
-	T->nxt	= settr(9,2,8,0,0,"ATOMIC", 1, 2, 0);
-	trans[0][8]	= settr(7,4,13,11,11,"((downwardsMutex>0))", 1, 2, 0); /* m: 9 -> 13,0 */
-	reached0[9] = 1;
-	trans[0][9]	= settr(0,0,0,0,0,"downwardsMutex = (downwardsMutex-1)",0,0,0);
-	T = trans[ 0][13] = settr(12,2,0,0,0,"ATOMIC", 1, 2, 0);
-	T->nxt	= settr(12,2,11,0,0,"ATOMIC", 1, 2, 0);
-	trans[0][11]	= settr(10,4,15,12,12,"((alleyMutex>0))", 1, 2, 0); /* m: 12 -> 15,0 */
-	reached0[12] = 1;
-	trans[0][12]	= settr(0,0,0,0,0,"alleyMutex = (alleyMutex-1)",0,0,0);
+	trans[0][72]	= settr(71,0,71,1,0,".(goto)", 0, 2, 0);
+	T = trans[0][71] = settr(70,0,0,0,0,"DO", 0, 2, 0);
+	    T->nxt	= settr(70,0,1,0,0,"DO", 0, 2, 0);
+	trans[0][1]	= settr(0,0,39,6,6,"isOppositeDir = ((no<=2)!=isDirDownward)", 1, 2, 0);
+	T = trans[0][39] = settr(38,0,0,0,0,"IF", 0, 2, 0);
+	T = T->nxt	= settr(38,0,2,0,0,"IF", 0, 2, 0);
+	    T->nxt	= settr(38,0,37,0,0,"IF", 0, 2, 0);
+	trans[0][2]	= settr(1,0,5,7,7,"(isOppositeDir)", 0, 2, 0);
+	T = trans[ 0][5] = settr(4,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(4,2,3,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][3]	= settr(2,4,6,8,8,"((isFirstMutex>0))", 1, 2, 0); /* m: 4 -> 6,0 */
+	reached0[4] = 1;
+	trans[0][4]	= settr(0,0,0,0,0,"isFirstMutex = (isFirstMutex-1)",0,0,0);
+	trans[0][6]	= settr(5,0,8,9,9,"isFirstDownwards = (isFirst&&(no<=2))", 1, 2, 0);
+	T = trans[ 0][8] = settr(7,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(7,2,7,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][7]	= settr(6,0,34,10,10,"isFirstMutex = (isFirstMutex+1)", 1, 2, 0);
+	T = trans[0][34] = settr(33,0,0,0,0,"IF", 0, 2, 0);
+	T = T->nxt	= settr(33,0,9,0,0,"IF", 0, 2, 0);
+	T = T->nxt	= settr(33,0,24,0,0,"IF", 0, 2, 0);
+	    T->nxt	= settr(33,0,30,0,0,"IF", 0, 2, 0);
+	trans[0][9]	= settr(8,0,12,11,0,"(isFirstDownwards)", 1, 2, 0);
+	T = trans[ 0][12] = settr(11,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(11,2,10,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][10]	= settr(9,4,13,12,12,"((isFirstMutex>0))", 1, 2, 0); /* m: 11 -> 13,0 */
+	reached0[11] = 1;
+	trans[0][11]	= settr(0,0,0,0,0,"isFirstMutex = (isFirstMutex-1)",0,0,0);
+	trans[0][13]	= settr(12,0,15,13,13,"isFirst = 0", 1, 2, 0);
 	T = trans[ 0][15] = settr(14,2,0,0,0,"ATOMIC", 1, 2, 0);
 	T->nxt	= settr(14,2,14,0,0,"ATOMIC", 1, 2, 0);
-	trans[0][14]	= settr(13,0,28,13,13,"downwardsMutex = (downwardsMutex+1)", 1, 2, 0);
-	trans[0][27]	= settr(26,0,28,1,0,".(goto)", 0, 2, 0);
-	trans[0][16]	= settr(15,0,19,14,0,"((no<5))", 0, 2, 0);
-	T = trans[ 0][19] = settr(18,2,0,0,0,"ATOMIC", 1, 2, 0);
-	T->nxt	= settr(18,2,17,0,0,"ATOMIC", 1, 2, 0);
-	trans[0][17]	= settr(16,4,21,15,15,"((downwardsMutex>0))", 1, 2, 0); /* m: 18 -> 21,0 */
-	reached0[18] = 1;
-	trans[0][18]	= settr(0,0,0,0,0,"downwardsMutex = (downwardsMutex-1)",0,0,0);
+	trans[0][14]	= settr(13,0,18,14,14,"isFirstMutex = (isFirstMutex+1)", 1, 2, 0);
+	T = trans[ 0][18] = settr(17,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(17,2,16,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][16]	= settr(15,4,21,15,15,"((downwardsMutex>0))", 1, 2, 0); /* m: 17 -> 21,0 */
+	reached0[17] = 1;
+	trans[0][17]	= settr(0,0,0,0,0,"downwardsMutex = (downwardsMutex-1)",0,0,0);
 	T = trans[ 0][21] = settr(20,2,0,0,0,"ATOMIC", 1, 2, 0);
-	T->nxt	= settr(20,2,20,0,0,"ATOMIC", 1, 2, 0);
-	trans[0][20]	= settr(19,0,28,16,16,"downwardsMutex = (downwardsMutex+1)", 1, 2, 0);
-	trans[0][22]	= settr(21,0,25,17,0,"((no>4))", 0, 2, 0);
-	T = trans[ 0][25] = settr(24,2,0,0,0,"ATOMIC", 1, 2, 0);
-	T->nxt	= settr(24,2,23,0,0,"ATOMIC", 1, 2, 0);
-	trans[0][23]	= settr(22,0,28,18,18,"((alleyMutex>0))", 1, 2, 0); /* m: 24 -> 28,0 */
-	reached0[24] = 1;
-	trans[0][24]	= settr(0,0,0,0,0,"alleyMutex = (alleyMutex-1)",0,0,0);
-	trans[0][28]	= settr(27,0,33,19,19,"dir = (no<5)", 1, 2, 0);
-	trans[0][30]	= settr(29,0,33,1,0,".(goto)", 0, 2, 0);
+	T->nxt	= settr(20,2,19,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][19]	= settr(18,4,23,16,16,"((alleyMutex>0))", 1, 2, 0); /* m: 20 -> 23,0 */
+	reached0[20] = 1;
+	trans[0][20]	= settr(0,0,0,0,0,"alleyMutex = (alleyMutex-1)",0,0,0);
+	T = trans[ 0][23] = settr(22,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(22,2,22,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][22]	= settr(21,0,36,17,17,"downwardsMutex = (downwardsMutex+1)", 1, 2, 0);
+	trans[0][35]	= settr(34,0,36,1,0,".(goto)", 0, 2, 0);
+	trans[0][24]	= settr(23,0,27,18,0,"((!(isFirstDownwards)&&(no<=2)))", 1, 2, 0);
+	T = trans[ 0][27] = settr(26,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(26,2,25,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][25]	= settr(24,4,29,19,19,"((downwardsMutex>0))", 1, 2, 0); /* m: 26 -> 29,0 */
+	reached0[26] = 1;
+	trans[0][26]	= settr(0,0,0,0,0,"downwardsMutex = (downwardsMutex-1)",0,0,0);
+	T = trans[ 0][29] = settr(28,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(28,2,28,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][28]	= settr(27,0,36,20,20,"downwardsMutex = (downwardsMutex+1)", 1, 2, 0);
+	trans[0][30]	= settr(29,0,33,21,0,"((no>=3))", 0, 2, 0);
 	T = trans[ 0][33] = settr(32,2,0,0,0,"ATOMIC", 1, 2, 0);
 	T->nxt	= settr(32,2,31,0,0,"ATOMIC", 1, 2, 0);
-	trans[0][31]	= settr(30,4,34,20,20,"((counterMutex>0))", 1, 2, 0); /* m: 32 -> 34,0 */
+	trans[0][31]	= settr(30,0,36,22,22,"((alleyMutex>0))", 1, 2, 0); /* m: 32 -> 36,0 */
 	reached0[32] = 1;
-	trans[0][32]	= settr(0,0,0,0,0,"counterMutex = (counterMutex-1)",0,0,0);
-	trans[0][34]	= settr(33,0,36,21,21,"counter = (counter+1)", 1, 2, 0);
-	T = trans[ 0][36] = settr(35,2,0,0,0,"ATOMIC", 1, 2, 0);
-	T->nxt	= settr(35,2,35,0,0,"ATOMIC", 1, 2, 0);
-	trans[0][35]	= settr(34,0,37,22,22,"counterMutex = (counterMutex+1)", 1, 2, 0);
-	trans[0][39]	= settr(38,0,40,1,0,"break", 0, 2, 0);
-	trans[0][40]	= settr(39,0,0,23,23,"-end-", 0, 3500, 0);
+	trans[0][32]	= settr(0,0,0,0,0,"alleyMutex = (alleyMutex-1)",0,0,0);
+	trans[0][36]	= settr(35,0,43,23,23,"isDirDownward = (no<=2)", 1, 2, 0);
+	trans[0][40]	= settr(39,0,43,1,0,".(goto)", 0, 2, 0);
+	trans[0][37]	= settr(36,0,38,24,24,"(!(isOppositeDir))", 0, 2, 0);
+	trans[0][38]	= settr(37,0,43,1,0,"(1)", 0, 2, 0);
+	T = trans[ 0][43] = settr(42,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(42,2,41,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][41]	= settr(40,4,44,25,25,"((counterMutex>0))", 1, 2, 0); /* m: 42 -> 44,0 */
+	reached0[42] = 1;
+	trans[0][42]	= settr(0,0,0,0,0,"counterMutex = (counterMutex-1)",0,0,0);
+	trans[0][44]	= settr(43,0,46,26,26,"counter = (counter+1)", 1, 2, 0);
+	T = trans[ 0][46] = settr(45,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(45,2,45,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][45]	= settr(44,0,49,27,27,"counterMutex = (counterMutex+1)", 1, 2, 0);
+	T = trans[ 0][49] = settr(48,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(48,2,47,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][47]	= settr(46,4,50,28,28,"((counterMutex>0))", 1, 2, 0); /* m: 48 -> 50,0 */
+	reached0[48] = 1;
+	trans[0][48]	= settr(0,0,0,0,0,"counterMutex = (counterMutex-1)",0,0,0);
+	trans[0][50]	= settr(49,0,67,29,29,"counter = (counter-1)", 1, 2, 0);
+	T = trans[0][67] = settr(66,0,0,0,0,"IF", 0, 2, 0);
+	T = T->nxt	= settr(66,0,51,0,0,"IF", 0, 2, 0);
+	    T->nxt	= settr(66,0,65,0,0,"IF", 0, 2, 0);
+	trans[0][51]	= settr(50,0,53,30,0,"((counter==0))", 1, 2, 0);
+	T = trans[ 0][53] = settr(52,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(52,2,52,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][52]	= settr(51,0,63,31,31,"alleyMutex = (alleyMutex+1)", 1, 2, 0);
+	T = trans[0][63] = settr(62,0,0,0,0,"IF", 0, 2, 0);
+	T = T->nxt	= settr(62,0,54,0,0,"IF", 0, 2, 0);
+	    T->nxt	= settr(62,0,61,0,0,"IF", 0, 2, 0);
+	trans[0][54]	= settr(53,0,57,32,0,"((no<=2))", 0, 2, 0);
+	T = trans[ 0][57] = settr(56,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(56,2,55,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][55]	= settr(54,4,58,33,33,"((isFirstMutex>0))", 1, 2, 0); /* m: 56 -> 58,0 */
+	reached0[56] = 1;
+	trans[0][56]	= settr(0,0,0,0,0,"isFirstMutex = (isFirstMutex-1)",0,0,0);
+	trans[0][58]	= settr(57,0,60,34,34,"isFirst = 1", 1, 2, 0);
+	T = trans[ 0][60] = settr(59,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(59,2,59,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][59]	= settr(58,0,70,35,35,"isFirstMutex = (isFirstMutex+1)", 1, 2, 0);
+	trans[0][64]	= settr(63,0,70,1,0,".(goto)", 0, 2, 0);
+	trans[0][61]	= settr(60,0,62,36,0,"((no>=3))", 0, 2, 0);
+	trans[0][62]	= settr(61,0,70,1,0,"(1)", 0, 2, 0);
+	trans[0][68]	= settr(67,0,70,1,0,".(goto)", 0, 2, 0);
+	trans[0][65]	= settr(64,0,66,37,0,"((counter!=0))", 1, 2, 0);
+	trans[0][66]	= settr(65,0,70,1,0,"(1)", 0, 2, 0);
+	T = trans[ 0][70] = settr(69,2,0,0,0,"ATOMIC", 1, 2, 0);
+	T->nxt	= settr(69,2,69,0,0,"ATOMIC", 1, 2, 0);
+	trans[0][69]	= settr(68,0,71,38,38,"counterMutex = (counterMutex+1)", 1, 2, 0);
+	trans[0][73]	= settr(72,0,74,1,0,"break", 0, 2, 0);
+	trans[0][74]	= settr(73,0,0,39,39,"-end-", 0, 3500, 0);
 	/* np_ demon: */
 	trans[_NP_] = (Trans **) emalloc(3*sizeof(Trans *));
 	T = trans[_NP_][0] = settr(9997,0,1,_T5,0,"(np_)", 1,2,0);

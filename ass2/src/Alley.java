@@ -7,7 +7,7 @@
 public class Alley {
 
     Semaphore alleyMutex, counterMutex, downwardsMutex, isFirstMutex;
-    boolean dir = false;
+    boolean isDirDownward = false;
     boolean isFirst = true;
     int counter = 0;
 
@@ -31,11 +31,12 @@ public class Alley {
     /* Block until car no. may enter alley */
     public void enter(int no) throws InterruptedException {
         if (no != 0) {
-            boolean isOppositeDir = no < 5 != dir;
+            boolean isDownward = no < 5;
+            boolean isOppositeDir = isDownward != isDirDownward;
 
             if (isOppositeDir) {
                 isFirstMutex.P();
-                boolean isFirstDownwards = isFirst && no < 5;
+                boolean isFirstDownwards = isFirst && isDownward;
                 isFirstMutex.V();
 
                 if (isFirstDownwards) {
@@ -52,7 +53,7 @@ public class Alley {
                 } else {
                     alleyMutex.P();
                 }
-                dir = no < 5;
+                isDirDownward = isDownward;
             }
 
             counterMutex.P();
@@ -64,14 +65,17 @@ public class Alley {
     /* Register that car no. has left the alley */
     public void leave(int no) throws InterruptedException {
         if (no != 0) {
+            boolean isDownward = no < 5;
             counterMutex.P();
             counter--;
             if (counter == 0) {
                 alleyMutex.V();
-                if (no < 5) {
+                if (isDownward) {
+                    isFirstMutex.P();
                     isFirst = true;
+                    isFirstMutex.V();
                 }
-            };
+            }
             counterMutex.V();
         }
     }

@@ -132,15 +132,15 @@ typedef struct S_F_MAP {
 	int upto;
 } S_F_MAP;
 
-#define _nstates1	10	/* :init: */
-#define minseq1	40
-#define maxseq1	48
-#define _endstate1	9
+#define _nstates1	15	/* :init: */
+#define minseq1	74
+#define maxseq1	87
+#define _endstate1	14
 
-#define _nstates0	41	/* Car */
+#define _nstates0	75	/* Car */
 #define minseq0	0
-#define maxseq0	39
-#define _endstate0	40
+#define maxseq0	73
+#define _endstate0	74
 
 extern short src_ln1[];
 extern short src_ln0[];
@@ -148,8 +148,8 @@ extern S_F_MAP src_file1[];
 extern S_F_MAP src_file0[];
 
 #define T_ID	unsigned char
-#define _T5	24
-#define _T2	25
+#define _T5	40
+#define _T2	41
 #define WS		8 /* word size in bytes */
 #define SYNC	0
 #define ASYNC	0
@@ -168,7 +168,7 @@ extern S_F_MAP src_file0[];
 typedef struct P1 { /* :init: */
 	unsigned _pid : 8;  /* 0..255 */
 	unsigned _t   : 3; /* proctype */
-	unsigned _p   : 7; /* state    */
+	unsigned _p   : 8; /* state    */
 #ifdef HAS_PRIORITY
 	unsigned _priority : 8; /* 0..255 */
 #endif
@@ -179,7 +179,7 @@ typedef struct P1 { /* :init: */
 typedef struct P0 { /* Car */
 	unsigned _pid : 8;  /* 0..255 */
 	unsigned _t   : 3; /* proctype */
-	unsigned _p   : 7; /* state    */
+	unsigned _p   : 8; /* state    */
 #ifdef HAS_PRIORITY
 	unsigned _priority : 8; /* 0..255 */
 #endif
@@ -191,7 +191,7 @@ typedef struct P0 { /* Car */
 typedef struct P2 { /* np_ */
 	unsigned _pid : 8;  /* 0..255 */
 	unsigned _t   : 3; /* proctype */
-	unsigned _p   : 7; /* state    */
+	unsigned _p   : 8; /* state    */
 #ifdef HAS_PRIORITY
 	unsigned _priority : 8; /* 0..255 */
 #endif
@@ -388,12 +388,13 @@ typedef struct State {
 		unsigned short _event;
 	#endif
 #endif
-	unsigned dir : 1;
+	unsigned isDirDownward : 1;
 	unsigned isFirst : 1;
 	unsigned isFirstDownwards : 1;
 	uchar downwardsMutex;
 	uchar alleyMutex;
 	uchar counterMutex;
+	uchar isFirstMutex;
 	uchar counter;
 #ifdef TRIX
 	/* room for 512 proc+chan ptrs, + safety margin */
@@ -416,10 +417,10 @@ typedef struct TRIX_v6 {
 #endif
 
 #define HAS_TRACK	0
-/* hidden variable: */	uchar up1;
-/* hidden variable: */	uchar up2;
-/* hidden variable: */	uchar down1;
-/* hidden variable: */	uchar down2;
+/* hidden variable: */	uchar downward1;
+/* hidden variable: */	uchar downward2;
+/* hidden variable: */	uchar upward1;
+/* hidden variable: */	uchar upward2;
 #define FORWARD_MOVES	"pan.m"
 #define BACKWARD_MOVES	"pan.b"
 #define TRANSITIONS	"pan.t"
@@ -428,8 +429,8 @@ typedef struct TRIX_v6 {
 #define _endstate2	2 /* np_ */
 
 #define _start2	0 /* np_ */
-#define _start1	3
-#define _start0	37
+#define _start1	8
+#define _start0	71
 #ifdef NP
 	#define ACCEPT_LAB	1 /* at least 1 in np_ */
 #else
@@ -789,7 +790,7 @@ void qsend(int, int, int);
 #define GLOBAL	7
 #define BAD	8
 #define ALPHA_F	9
-#define NTRANS	26
+#define NTRANS	42
 #if defined(BFS_PAR) || NCORE>1
 	void e_critical(int);
 	void x_critical(int);

@@ -487,37 +487,45 @@ int _;	/* predefined write-only variable */
 #endif
 
 short src_ln1 [] = {
-	  0,  38,  39,  37,  42,  43,  44,  45, 
-	 41,  47,   0, };
+	  0,  58,  59,  60,  61,  62,  63,  64, 
+	 57,  67,  68,  69,  70,  66,  72,   0, };
 S_F_MAP src_file1 [] = {
 	{ "-", 0, 0 },
-	{ "pr4", 1, 9 },
-	{ "-", 10, 11 }
+	{ "pr4", 1, 14 },
+	{ "-", 15, 16 }
 };
 uchar reached1 [] = {
-	  0,   1,   0,   0,   1,   0,   0,   0, 
-	  0,   0,   0, };
+	  0,   1,   0,   0,   0,   0,   0,   0, 
+	  0,   1,   0,   0,   0,   0,   0,   0, };
 uchar *loopstate1;
 
 short src_ln0 [] = {
-	  0,  14,  14,  15,  15,  17,  18,  18, 
-	 19,  19,  19,  20,  20,  20,  21,  21, 
-	 22,  23,  23,  23,  24,  24,  25,  25, 
-	 25,  25,  16,  27,  27,  14,  29,  29, 
-	 29,  29,  30,  31,  31,  12,  33,  12, 
-	 33,   0, };
+	  0,  14,  14,  15,  15,  15,  16,  17, 
+	 17,  19,  20,  20,  20,  21,  22,  22, 
+	 24,  24,  24,  25,  25,  25,  26,  26, 
+	 27,  28,  28,  28,  29,  29,  30,  30, 
+	 30,  30,  18,  32,  32,  33,  33,  14, 
+	 35,  35,  35,  35,  36,  37,  37,  39, 
+	 39,  39,  40,  41,  42,  42,  43,  44, 
+	 44,  44,  45,  46,  46,  47,  47,  43, 
+	 49,  49,  49,  41,  51,  51,  51,  11, 
+	 53,  11,  53,   0, };
 S_F_MAP src_file0 [] = {
 	{ "-", 0, 0 },
-	{ "pr4", 1, 40 },
-	{ "-", 41, 42 }
+	{ "pr4", 1, 74 },
+	{ "-", 75, 76 }
 };
 uchar reached0 [] = {
-	  0,   1,   1,   1,   0,   1,   1,   0, 
+	  0,   1,   1,   1,   0,   0,   0,   1, 
+	  0,   1,   1,   0,   0,   0,   1,   0, 
 	  1,   0,   0,   1,   0,   0,   1,   0, 
 	  1,   1,   0,   0,   1,   0,   1,   1, 
-	  0,   0,   0,   1,   0,   0,   1,   1, 
-	  0,   0,   0,   1,   0,   0,   1,   1, 
-	  0,   0, };
+	  0,   0,   0,   1,   0,   1,   1,   0, 
+	  1,   1,   0,   0,   0,   1,   0,   1, 
+	  0,   0,   0,   1,   1,   0,   1,   1, 
+	  0,   0,   0,   1,   0,   1,   1,   0, 
+	  1,   1,   1,   0,   1,   1,   0,   0, 
+	  1,   1,   0,   0, };
 uchar *loopstate0;
 uchar reached2[3];  /* np_ */
 uchar *loopstate2;  /* np_ */
@@ -825,11 +833,11 @@ addproc(int calling_pid, int priority, int n, int par0)
 		break;
 	case 1:	/* :init: */
 		((P1 *)pptr(h))->_t = 1;
-		((P1 *)pptr(h))->_p = 3;
+		((P1 *)pptr(h))->_p = 8;
 #ifdef HAS_PRIORITY
 		((P1 *)pptr(h))->_priority = priority; /* was: 1 */
 #endif
-		reached1[3]=1;
+		reached1[8]=1;
 		/* params: */
 		/* locals: */
 #ifdef HAS_CODE
@@ -838,11 +846,11 @@ addproc(int calling_pid, int priority, int n, int par0)
 		break;
 	case 0:	/* Car */
 		((P0 *)pptr(h))->_t = 0;
-		((P0 *)pptr(h))->_p = 37;
+		((P0 *)pptr(h))->_p = 71;
 #ifdef HAS_PRIORITY
 		((P0 *)pptr(h))->_priority = priority; /* was: 1 */
 #endif
-		reached0[37]=1;
+		reached0[71]=1;
 		/* params: */
 		((P0 *)pptr(h))->no = par0;
 		/* locals: */
@@ -12344,24 +12352,26 @@ do_reach(void)
 void
 iniglobals(int calling_pid)
 {
-		now.dir = 0;
+		now.isDirDownward = 0;
 		now.isFirst = 0;
 		now.isFirstDownwards = 0;
-		up1 = 0;
-		up2 = 0;
-		down1 = 0;
-		down2 = 0;
+		downward1 = 0;
+		downward2 = 0;
+		upward1 = 0;
+		upward2 = 0;
 		now.downwardsMutex = 0;
 		now.alleyMutex = 0;
 		now.counterMutex = 0;
+		now.isFirstMutex = 0;
 		now.counter = 0;
 #ifdef VAR_RANGES
-		logval("dir", now.dir);
+		logval("isDirDownward", now.isDirDownward);
 		logval("isFirst", now.isFirst);
 		logval("isFirstDownwards", now.isFirstDownwards);
 		logval("downwardsMutex", now.downwardsMutex);
 		logval("alleyMutex", now.alleyMutex);
 		logval("counterMutex", now.counterMutex);
+		logval("isFirstMutex", now.isFirstMutex);
 		logval("counter", now.counter);
 #endif
 }
@@ -14062,8 +14072,9 @@ c_globals(void)
 	printf("	byte   downwardsMutex:	%d\n", now.downwardsMutex);
 	printf("	byte   alleyMutex:	%d\n", now.alleyMutex);
 	printf("	byte   counterMutex:	%d\n", now.counterMutex);
+	printf("	byte   isFirstMutex:	%d\n", now.isFirstMutex);
 	printf("	byte   counter:	%d\n", now.counter);
-	printf("	bit    dir:	%d\n", now.dir);
+	printf("	bit    isDirDownward:	%d\n", now.isDirDownward);
 	printf("	bit    isFirst:	%d\n", now.isFirst);
 	printf("	bit    isFirstDownwards:	%d\n", now.isFirstDownwards);
 }
@@ -14091,7 +14102,7 @@ c_chandump(int unused)
 {	unused++; /* avoid complaints */
 }
 
-Trans *t_id_lkup[49];
+Trans *t_id_lkup[88];
 
 
 #ifdef BFS_PAR
