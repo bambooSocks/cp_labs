@@ -4,51 +4,60 @@
 #define UPWARD(X) ( X >= 3 )
 
 pid downward1, downward2, upward1, upward2;
-byte downwardsMutex, alleyMutex, counterMutex, isFirstMutex, counter;
+byte downwardsMutex, alleyMutex, counterMutex, isFirstMutex, counter, critical;
 bool isDirDownward, isFirst, isFirstDownwards;
 
 proctype Car(byte no) {
 	do :: 	
 		/*ENTER*/
+        P(critical);
 		bool isOppositeDir = (DOWNWARD(no) != isDirDownward);
 		if :: isOppositeDir -> 
-			P(isFirstMutex);
 			isFirstDownwards = (isFirst && DOWNWARD(no));
-			V(isFirstMutex);
 			if 
 			:: isFirstDownwards ->
-                P(isFirstMutex);
 				isFirst = 0;
-                V(isFirstMutex);
 
 				P(downwardsMutex);
+
+                V(critical);
 				P(alleyMutex);
+                P(critical);
 				V(downwardsMutex)
 			:: !isFirstDownwards && DOWNWARD(no) ->
+                V(critical);
 				P(downwardsMutex);
+                P(critical);
 				V(downwardsMutex)
-			:: UPWARD(no) -> P(alleyMutex)
+			:: UPWARD(no) -> 
+                V(critical);
+                P(alleyMutex);
+                P(critical);
+        
 			fi;
 			isDirDownward = DOWNWARD(no)
             :: !isOppositeDir -> skip
 		fi;
-		P(counterMutex);
 		counter = counter + 1;
-		V(counterMutex);
+        V(critical);
+
+        /*ASSERTION*/
+        // check whether the car is travelling in the correct direction
+        // if :: isDirDownward  -> assert(DOWNWARD(no))
+        //    :: !isDirDownward -> assert(UPWARD(no))
+        // fi
+
 		/*LEAVE*/
-		P(counterMutex);
+        P(critical);
 		counter = counter - 1;
 		if :: counter == 0 ->
 			V(alleyMutex);
-			if :: DOWNWARD(no) ->
-				P(isFirstMutex);
-				isFirst = 1;
-				V(isFirstMutex)
-                :: UPWARD(no) -> skip
+			if :: DOWNWARD(no) -> isFirst = 1
+               :: UPWARD(no) -> skip
 			fi
             :: counter != 0 -> skip
 		fi
-		V(counterMutex)
+        V(critical);
 	od
 }
 
@@ -60,7 +69,8 @@ init {
 		downwardsMutex = 1;
 		alleyMutex = 1;
 		counterMutex = 1;
-		isFirstMutex =1;
+		isFirstMutex = 1;
+        critical = 1;
 		counter = 0
 	}
 	atomic {
@@ -69,4 +79,4 @@ init {
 		upward1 = run Car(3);
 		upward2 = run Car(4)
 	}
-} 
+}

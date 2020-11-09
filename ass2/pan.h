@@ -132,10 +132,10 @@ typedef struct S_F_MAP {
 	int upto;
 } S_F_MAP;
 
-#define _nstates1	15	/* :init: */
+#define _nstates1	16	/* :init: */
 #define minseq1	74
-#define maxseq1	87
-#define _endstate1	14
+#define maxseq1	88
+#define _endstate1	15
 
 #define _nstates0	75	/* Car */
 #define minseq0	0
@@ -393,9 +393,8 @@ typedef struct State {
 	unsigned isFirstDownwards : 1;
 	uchar downwardsMutex;
 	uchar alleyMutex;
-	uchar counterMutex;
-	uchar isFirstMutex;
 	uchar counter;
+	uchar critical;
 #ifdef TRIX
 	/* room for 512 proc+chan ptrs, + safety margin */
 	char *_ids_[MAXPROC+MAXQ+4];
@@ -421,6 +420,8 @@ typedef struct TRIX_v6 {
 /* hidden variable: */	uchar downward2;
 /* hidden variable: */	uchar upward1;
 /* hidden variable: */	uchar upward2;
+/* hidden variable: */	uchar counterMutex;
+/* hidden variable: */	uchar isFirstMutex;
 #define FORWARD_MOVES	"pan.m"
 #define BACKWARD_MOVES	"pan.b"
 #define TRANSITIONS	"pan.t"
@@ -429,7 +430,7 @@ typedef struct TRIX_v6 {
 #define _endstate2	2 /* np_ */
 
 #define _start2	0 /* np_ */
-#define _start1	8
+#define _start1	9
 #define _start0	71
 #ifdef NP
 	#define ACCEPT_LAB	1 /* at least 1 in np_ */

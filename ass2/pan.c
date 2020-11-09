@@ -487,43 +487,45 @@ int _;	/* predefined write-only variable */
 #endif
 
 short src_ln1 [] = {
-	  0,  58,  59,  60,  61,  62,  63,  64, 
-	 57,  67,  68,  69,  70,  66,  72,   0, };
+	  0,  67,  68,  69,  70,  71,  72,  73, 
+	 74,  66,  77,  78,  79,  80,  76,  82, 
+	  0, };
 S_F_MAP src_file1 [] = {
 	{ "-", 0, 0 },
-	{ "pr4", 1, 14 },
-	{ "-", 15, 16 }
+	{ "pr4", 1, 15 },
+	{ "-", 16, 17 }
 };
 uchar reached1 [] = {
 	  0,   1,   0,   0,   0,   0,   0,   0, 
-	  0,   1,   0,   0,   0,   0,   0,   0, };
+	  0,   0,   1,   0,   0,   0,   0,   0, 
+	  0, };
 uchar *loopstate1;
 
 short src_ln0 [] = {
-	  0,  14,  14,  15,  15,  15,  16,  17, 
-	 17,  19,  20,  20,  20,  21,  22,  22, 
-	 24,  24,  24,  25,  25,  25,  26,  26, 
-	 27,  28,  28,  28,  29,  29,  30,  30, 
-	 30,  30,  18,  32,  32,  33,  33,  14, 
-	 35,  35,  35,  35,  36,  37,  37,  39, 
-	 39,  39,  40,  41,  42,  42,  43,  44, 
-	 44,  44,  45,  46,  46,  47,  47,  43, 
-	 49,  49,  49,  41,  51,  51,  51,  11, 
-	 53,  11,  53,   0, };
+	  0,  13,  13,  13,  15,  15,  16,  18, 
+	 19,  21,  21,  21,  23,  23,  24,  24, 
+	 24,  25,  25,  25,  26,  26,  27,  28, 
+	 28,  29,  29,  29,  30,  30,  30,  31, 
+	 31,  32,  33,  33,  34,  34,  34,  35, 
+	 35,  35,  17,  38,  38,  39,  39,  15, 
+	 41,  41,  42,  42,  51,  51,  51,  52, 
+	 53,  54,  54,  55,  55,  56,  56,  55, 
+	 58,  58,  58,  53,  60,  60,  60,  11, 
+	 62,  11,  62,   0, };
 S_F_MAP src_file0 [] = {
 	{ "-", 0, 0 },
 	{ "pr4", 1, 74 },
 	{ "-", 75, 76 }
 };
 uchar reached0 [] = {
-	  0,   1,   1,   1,   0,   0,   0,   1, 
-	  0,   1,   1,   0,   0,   0,   1,   0, 
-	  1,   0,   0,   1,   0,   0,   1,   0, 
-	  1,   1,   0,   0,   1,   0,   1,   1, 
+	  0,   1,   0,   1,   0,   1,   0,   1, 
+	  0,   1,   0,   0,   1,   0,   1,   0, 
+	  0,   1,   0,   0,   1,   0,   1,   1, 
+	  0,   1,   0,   0,   1,   0,   0,   1, 
+	  0,   1,   1,   0,   1,   0,   0,   1, 
 	  0,   0,   0,   1,   0,   1,   1,   0, 
-	  1,   1,   0,   0,   0,   1,   0,   1, 
-	  0,   0,   0,   1,   1,   0,   1,   1, 
-	  0,   0,   0,   1,   0,   1,   1,   0, 
+	  1,   0,   1,   0,   1,   0,   0,   0, 
+	  1,   1,   0,   1,   0,   1,   1,   0, 
 	  1,   1,   1,   0,   1,   1,   0,   0, 
 	  1,   1,   0,   0, };
 uchar *loopstate0;
@@ -833,11 +835,11 @@ addproc(int calling_pid, int priority, int n, int par0)
 		break;
 	case 1:	/* :init: */
 		((P1 *)pptr(h))->_t = 1;
-		((P1 *)pptr(h))->_p = 8;
+		((P1 *)pptr(h))->_p = 9;
 #ifdef HAS_PRIORITY
 		((P1 *)pptr(h))->_priority = priority; /* was: 1 */
 #endif
-		reached1[8]=1;
+		reached1[9]=1;
 		/* params: */
 		/* locals: */
 #ifdef HAS_CODE
@@ -12361,18 +12363,18 @@ iniglobals(int calling_pid)
 		upward2 = 0;
 		now.downwardsMutex = 0;
 		now.alleyMutex = 0;
-		now.counterMutex = 0;
-		now.isFirstMutex = 0;
+		counterMutex = 0;
+		isFirstMutex = 0;
 		now.counter = 0;
+		now.critical = 0;
 #ifdef VAR_RANGES
 		logval("isDirDownward", now.isDirDownward);
 		logval("isFirst", now.isFirst);
 		logval("isFirstDownwards", now.isFirstDownwards);
 		logval("downwardsMutex", now.downwardsMutex);
 		logval("alleyMutex", now.alleyMutex);
-		logval("counterMutex", now.counterMutex);
-		logval("isFirstMutex", now.isFirstMutex);
 		logval("counter", now.counter);
+		logval("critical", now.critical);
 #endif
 }
 
@@ -14071,9 +14073,8 @@ c_globals(void)
 	printf("global vars:\n");
 	printf("	byte   downwardsMutex:	%d\n", now.downwardsMutex);
 	printf("	byte   alleyMutex:	%d\n", now.alleyMutex);
-	printf("	byte   counterMutex:	%d\n", now.counterMutex);
-	printf("	byte   isFirstMutex:	%d\n", now.isFirstMutex);
 	printf("	byte   counter:	%d\n", now.counter);
+	printf("	byte   critical:	%d\n", now.critical);
 	printf("	bit    isDirDownward:	%d\n", now.isDirDownward);
 	printf("	bit    isFirst:	%d\n", now.isFirst);
 	printf("	bit    isFirstDownwards:	%d\n", now.isFirstDownwards);
@@ -14102,7 +14103,7 @@ c_chandump(int unused)
 {	unused++; /* avoid complaints */
 }
 
-Trans *t_id_lkup[88];
+Trans *t_id_lkup[89];
 
 
 #ifdef BFS_PAR
