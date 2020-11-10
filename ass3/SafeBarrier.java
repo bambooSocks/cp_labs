@@ -15,8 +15,8 @@ class SafeBarrier extends Barrier {
     int threshold = 9;
     int moved = 0;
     Lock lock = new ReentrantLock();
-    Condition barrierReached = lock.newCondition();
-    Condition syncAfterBarrier = lock.newCondition();
+    Condition isOverThreshold = lock.newCondition();
+    Condition isLastCarArrived = lock.newCondition();
 
     public SafeBarrier(CarDisplayI cd) {
         super(cd);
@@ -32,11 +32,11 @@ class SafeBarrier extends Barrier {
 
             // check for last car to arrive
             if (arrived >= threshold) {
-                barrierReached.signalAll();
+                isOverThreshold.signalAll();
             } else {
                 // if not the last wait
                 while (active && arrived < threshold) {
-                    barrierReached.await();
+                    isOverThreshold.await();
                 }
             }
 
@@ -45,9 +45,9 @@ class SafeBarrier extends Barrier {
             if (moved >= arrived) {
                 arrived = 0;
                 moved = 0;
-                syncAfterBarrier.signalAll();
+                isLastCarArrived.signalAll();
             } else {
-                syncAfterBarrier.await();
+                isLastCarArrived.await();
             }
 
         } finally {
@@ -66,7 +66,7 @@ class SafeBarrier extends Barrier {
         try {
             active = false;
             arrived = 0;
-            barrierReached.signalAll();
+            isOverThreshold.signalAll();
         } finally {
             lock.unlock();
         }
@@ -78,7 +78,7 @@ class SafeBarrier extends Barrier {
         lock.lock();
         try {
             threshold = k;
-            barrierReached.signalAll();
+            isOverThreshold.signalAll();
         } finally {
             lock.unlock();
         }
