@@ -16,13 +16,10 @@ class NaiveBarrier extends Barrier {
 
     @Override
     public void sync(int no) throws InterruptedException {
-
         synchronized(this) {
 
             if (!active) return;
-
             arrived++;
-
             Thread.sleep(100);
 
             if (arrived < threshold) {
@@ -31,7 +28,6 @@ class NaiveBarrier extends Barrier {
                 arrived = 0;
                 notifyAll();
             }
-
         }
     }
 
@@ -54,10 +50,10 @@ class NaiveBarrier extends Barrier {
     @Override
     // May be (ab)used for robustness testing
     public void set(int k) {
-        threshold = k;
-//        synchronized(this) {
-//             notifyAll();
-//        }
+        synchronized(this) {
+            threshold = k;
+            notifyAll();
+        }
     }
 
 }
