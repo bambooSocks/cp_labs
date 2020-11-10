@@ -37,7 +37,9 @@ class NaiveBarrier extends Barrier {
 
     @Override
     public void on() {
-        active = true;
+        synchronized (this) {
+            active = true;
+        }
     }
 
     @Override
