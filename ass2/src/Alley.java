@@ -37,13 +37,10 @@ public class Alley {
             if (isOppositeDir) {
                 isFirstMutex.P();
                 boolean isFirstDownwards = isFirst && isDownward;
+                if (isFirstDownwards) isFirst = false;
                 isFirstMutex.V();
 
                 if (isFirstDownwards) {
-                    isFirstMutex.P();
-                    isFirst = false;
-                    isFirstMutex.V();
-
                     downwardsMutex.P();
                     alleyMutex.P();
                     downwardsMutex.V();
