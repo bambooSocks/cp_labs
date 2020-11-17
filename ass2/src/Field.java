@@ -10,12 +10,10 @@ import java.util.Map;
 
 public class Field {
 
-    Semaphore accessMap;
     Map<Pos, Semaphore> positionSemaphore;
 
     public Field() {
         positionSemaphore = Collections.synchronizedMap(new HashMap<>());
-        accessMap = new Semaphore(1);
     }
 
     /* Block until car no. may safely enter tile at pos */
