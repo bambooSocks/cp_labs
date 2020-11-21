@@ -8,7 +8,8 @@ byte downwardsMutex, alleyMutex, counterMutex, isFirstMutex, counter, critical;
 bool isDirDownward, isFirst;
 
 proctype Car(byte no) {
-	do :: 	
+	do :: 
+		P(critical);	
 		/*ENTER*/
 		bool isDownward = DOWNWARD(no);
 		bool isOppositeDir = (isDownward != isDirDownward);
@@ -36,7 +37,7 @@ proctype Car(byte no) {
 		P(counterMutex);
 		counter = counter + 1;
 		V(counterMutex);
-
+		V(critical);
         		/*ASSERTION*/
         		// check whether the car is travelling in the correct direction
         		if :: isDirDownward  -> assert(DOWNWARD(no))
@@ -44,6 +45,7 @@ proctype Car(byte no) {
         		fi;
 
 		/*LEAVE*/
+		P(critical);
 		isDownward = DOWNWARD(no);
 		P(counterMutex);
 		counter = counter - 1;
@@ -58,6 +60,7 @@ proctype Car(byte no) {
             		   :: counter != 0 -> skip
 		fi;
 		V(counterMutex);
+		V(critical)
 	od
 }
 
