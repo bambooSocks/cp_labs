@@ -1,3 +1,5 @@
+import java.io.Console;
+
 //Prototype implementation of Alley class
 //Mandatory assignment 2
 //Course 02158 Concurrent Programming, DTU, Fall 2020
@@ -7,7 +9,9 @@
 public class Alley {
 
     Semaphore alleyMutex, counterMutex, downwardsMutex, isFirstMutex, dirMutex;
-    boolean isDirDownward = false;
+    boolean isDirDownward = true;
+    int firstDownwardNo = -1;
+    int firstUpwardNo = -1;
     boolean isFirst = true;
     int counter = 0;
 
@@ -36,29 +40,77 @@ public class Alley {
             dirMutex.P();
             boolean isOppositeDir = isDownward != isDirDownward;
             dirMutex.V();
-            if(isOppositeDir) {
+            if (!isOppositeDir) {
                 isFirstMutex.P();
-                boolean isFirstDownwards = isFirst && isDownward;
-                if (isFirstDownwards) isFirst = false;
-                isFirstMutex.V();
-                if (isFirstDownwards) {
+                if(isDownward && firstDownwardNo == -1) {   
+                    firstDownwardNo = no;
+                    alleyMutex.P();
+                } else if(!isDownward && firstUpwardNo == -1) {
+                    firstUpwardNo = no;
+                    alleyMutex.P();
+                }  
+                isFirstMutex.V();   
+            } else {
+                isFirstMutex.P();
+                if(isDownward && firstDownwardNo == -1) {   
+                    firstDownwardNo = no;
+                    isFirstMutex.V();
                     downwardsMutex.P();
                     alleyMutex.P();
                     downwardsMutex.V();
-                } else if (no < 5) {
+                    dirMutex.P();
+                    isDirDownward = isDownward;
+                    dirMutex.V();
+                } else if(!isDownward && firstUpwardNo == -1) {
+                    firstUpwardNo = no;
+                    isFirstMutex.V();
                     downwardsMutex.P();
+                    alleyMutex.P();
                     downwardsMutex.V();
+                    dirMutex.P();
+                    isDirDownward = isDownward;
+                    dirMutex.V();
                 } else {
-                    alleyMutex.P();
+                    isFirstMutex.V();
+                    downwardsMutex.P();
+                    downwardsMutex.V();
                 }
-                dirMutex.P();
-                isDirDownward = isDownward;
-                dirMutex.V();
-            } 
+              
+            }
             counterMutex.P();
             counter++;
             counterMutex.V();
+            
         }
+
+        // if (no != 0) {
+        //     boolean isDownward = no < 5;
+        //     dirMutex.P();
+        //     boolean isOppositeDir = isDownward != isDirDownward;
+        //     dirMutex.V();
+        //     if(isOppositeDir) {
+        //         isFirstMutex.P();
+        //         boolean isFirstDownwards = isFirst && isDownward;
+        //         if (isFirstDownwards) isFirst = false;
+        //         isFirstMutex.V();
+        //         if (isFirstDownwards) {
+        //             downwardsMutex.P();
+        //             alleyMutex.P();
+        //             downwardsMutex.V();
+        //         } else if (no < 5) {
+        //             downwardsMutex.P();
+        //             downwardsMutex.V();
+        //         } else {
+        //             alleyMutex.P();
+        //         }
+        //         dirMutex.P();
+        //         isDirDownward = isDownward;
+        //         dirMutex.V();
+        //     } 
+        //     counterMutex.P();
+        //     counter++;
+        //     counterMutex.V();
+        // }
     }
 
     /* Register that car no. has left the alley */
@@ -68,14 +120,18 @@ public class Alley {
             counterMutex.P();
             counter--;
             if (counter == 0) {
+                counterMutex.V();
                 alleyMutex.V();
-                if (isDownward) {
-                    isFirstMutex.P();
-                    isFirst = true;
-                    isFirstMutex.V();
+                isFirstMutex.P();
+                if (isDownward) {  
+                    firstDownwardNo = -1;  
+                } else {
+                    firstUpwardNo = -1;
                 }
+                isFirstMutex.V();
+            } else {
+                counterMutex.V();
             }
-            counterMutex.V();
         }
     }
 

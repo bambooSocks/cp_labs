@@ -1,11 +1,13 @@
-#define P(X) atomic{ X > 0 -> X-- }
+#define P(X) atomic{ X > 0 -> X--} 
 #define V(X) atomic{ X++ }
 #define DOWNWARD(X) ( X <= 2 )
 #define UPWARD(X) ( X >= 3 )
-
+#define INVALID(X) (X == 0)
 pid downward1, downward2, upward1, upward2;
 byte downwardsMutex, alleyMutex, counterMutex, isFirstMutex, counter, dirMutex;
 bool isDirDownward, isFirst;
+byte firstDownwardNo, firstUpwardNo;
+
 
 proctype Car(byte no) {
 	do :: 
@@ -14,37 +16,53 @@ proctype Car(byte no) {
 		P(dirMutex);
 		bool isOppositeDir = (isDownward != isDirDownward);
 		V(dirMutex);
-		if :: isOppositeDir -> 
+		if :: !isOppositeDir -> 
 			P(isFirstMutex);
-			bool isFirstDownwards = (isFirst && isDownward);
-			if :: isFirstDownwards -> isFirst = 0 
-			   :: !isFirstDownwards -> skip
+			if :: isDownward && INVALID(firstDownwardNo) -> 
+				firstDownwardNo = no;
+				P(alleyMutex)
+			   :: !isDownward && INVALID(firstUpwardNo) -> 
+				firstUpwardNo == no;
+				P(alleyMutex)
+ 			   :: else -> skip
 			fi;
 			V(isFirstMutex);
+            		   :: isOppositeDir -> 
+			P(isFirstMutex);
+			if :: isDownward && INVALID(firstDownwardNo) ->
+				firstDownwardNo = no;
+                   			V(isFirstMutex);
+                    			P(downwardsMutex);
+                   			P(alleyMutex);
+                    			V(downwardsMutex);
+                    			P(dirMutex);
+                    			isDirDownward = isDownward;
+                    			V(dirMutex)
+			  :: !isDownward && INVALID(firstUpwardNo) ->
+				firstUpwardNo = no;
+                   			V(isFirstMutex);
+                    			P(downwardsMutex);
+                   			P(alleyMutex);
+                    			V(downwardsMutex);
+                    			P(dirMutex);
+                    			isDirDownward = isDownward;
+                    			V(dirMutex)
+			   :: else -> 
+				V(isFirstMutex);
+				P(downwardsMutex);
+				V(downwardsMutex)
 
-			if :: isFirstDownwards ->
-				P(downwardsMutex);
-				P(alleyMutex);
-				V(downwardsMutex)
-			:: !isFirstDownwards && isDownward ->
-				P(downwardsMutex);
-				V(downwardsMutex)
-			:: !isFirstDownwards && !isDownward -> 
-				P(alleyMutex);
-			fi;
-			P(dirMutex);
-			isDirDownward = isDownward;
-			V(dirMutex);
-            		   :: !isOppositeDir -> skip
+                   		fi;
+			P(counterMutex);
+			counter = counter + 1;
+			V(counterMutex)
 		fi;
-		P(counterMutex);
-		counter = counter + 1;
-		V(counterMutex);
+		
 
 		/*ASSERTION*/
 		// check whether the car is travelling in the correct direction
 		if :: isDirDownward  -> assert(DOWNWARD(no))
-			:: !isDirDownward -> assert(UPWARD(no))
+		   :: !isDirDownward -> assert(UPWARD(no))
 		fi;
 
 		/*LEAVE*/
@@ -52,19 +70,19 @@ proctype Car(byte no) {
 		P(counterMutex);
 		counter = counter - 1;
 		if :: counter == 0 ->
-			V(alleyMutex);
+			V(counterMutex)
+			V(alleyMutex)
+			P(isFirstMutex)
 			if :: isDownward -> 
-				P(isFirstMutex);
-				isFirst = 1;
-				V(isFirstMutex)
-               		  :: !isDownward -> skip
+			      	firstDownwardNo = 0
+               		  :: !isDownward -> 
+				firstUpwardNo = 0
 			fi
             		   :: counter != 0 -> skip
 		fi;
-		V(counterMutex);
 	od
+		
 }
-
 
 init {
 	atomic {
@@ -74,7 +92,9 @@ init {
 		alleyMutex = 1;
 		counterMutex = 1;
 		isFirstMutex = 1;
-        dirMutex = 1;
+        		dirMutex = 1;
+		firstDownwardNo = 0;
+		firstUpwardNo = 0;
 		counter = 0
 	}
 	atomic {
