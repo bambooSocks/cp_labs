@@ -6,7 +6,7 @@
 
 public class Alley {
 
-    Semaphore alleyMutex, counterMutex, downwardsMutex, isFirstMutex;
+    Semaphore alleyMutex, counterMutex, downwardsMutex, isFirstMutex, dirMutex;
     boolean isDirDownward = false;
     boolean isFirst = true;
     int counter = 0;
@@ -16,6 +16,7 @@ public class Alley {
         alleyMutex = new Semaphore(1);
         counterMutex = new Semaphore(1);
         isFirstMutex = new Semaphore(1);
+        dirMutex = new Semaphore(1);
     }
 
     /* Determine whether pos is right before alley is entered */
@@ -32,18 +33,15 @@ public class Alley {
     public void enter(int no) throws InterruptedException {
         if (no != 0) {
             boolean isDownward = no < 5;
+            dirMutex.P();
             boolean isOppositeDir = isDownward != isDirDownward;
-
-            if (isOppositeDir) {
+            dirMutex.V();
+            if(isOppositeDir) {
                 isFirstMutex.P();
                 boolean isFirstDownwards = isFirst && isDownward;
+                if (isFirstDownwards) isFirst = false;
                 isFirstMutex.V();
-
                 if (isFirstDownwards) {
-                    isFirstMutex.P();
-                    isFirst = false;
-                    isFirstMutex.V();
-
                     downwardsMutex.P();
                     alleyMutex.P();
                     downwardsMutex.V();
@@ -53,9 +51,10 @@ public class Alley {
                 } else {
                     alleyMutex.P();
                 }
+                dirMutex.P();
                 isDirDownward = isDownward;
-            }
-
+                dirMutex.V();
+            } 
             counterMutex.P();
             counter++;
             counterMutex.V();
