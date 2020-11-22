@@ -4,15 +4,16 @@
 #define UPWARD(X) ( X >= 3 )
 
 pid downward1, downward2, upward1, upward2;
-byte downwardsMutex, alleyMutex, counterMutex, isFirstMutex, counter, critical;
+byte downwardsMutex, alleyMutex, counterMutex, isFirstMutex, counter, dirMutex;
 bool isDirDownward, isFirst;
 
 proctype Car(byte no) {
 	do :: 
-		P(critical);	
 		/*ENTER*/
 		bool isDownward = DOWNWARD(no);
+		P(dirMutex);
 		bool isOppositeDir = (isDownward != isDirDownward);
+		V(dirMutex);
 		if :: isOppositeDir -> 
 			P(isFirstMutex);
 			bool isFirstDownwards = (isFirst && isDownward);
@@ -29,23 +30,24 @@ proctype Car(byte no) {
 				P(downwardsMutex);
 				V(downwardsMutex)
 			:: !isFirstDownwards && !isDownward -> 
-                			P(alleyMutex)
+				P(alleyMutex);
 			fi;
-			isDirDownward = isDownward
+			P(dirMutex);
+			isDirDownward = isDownward;
+			V(dirMutex);
             		   :: !isOppositeDir -> skip
 		fi;
 		P(counterMutex);
 		counter = counter + 1;
 		V(counterMutex);
-		V(critical);
+
         		/*ASSERTION*/
         		// check whether the car is travelling in the correct direction
-        		if :: isDirDownward  -> assert(DOWNWARD(no))
+         		if :: isDirDownward  -> assert(DOWNWARD(no))
          		   :: !isDirDownward -> assert(UPWARD(no))
         		fi;
 
 		/*LEAVE*/
-		P(critical);
 		isDownward = DOWNWARD(no);
 		P(counterMutex);
 		counter = counter - 1;
@@ -60,7 +62,6 @@ proctype Car(byte no) {
             		   :: counter != 0 -> skip
 		fi;
 		V(counterMutex);
-		V(critical)
 	od
 }
 
@@ -73,7 +74,7 @@ init {
 		alleyMutex = 1;
 		counterMutex = 1;
 		isFirstMutex = 1;
-        critical = 1;
+        dirMutex = 1;
 		counter = 0
 	}
 	atomic {
