@@ -41,11 +41,11 @@ proctype Car(byte no) {
 		counter = counter + 1;
 		V(counterMutex);
 
-        		/*ASSERTION*/
-        		// check whether the car is travelling in the correct direction
-         		if :: isDirDownward  -> assert(DOWNWARD(no))
-         		   :: !isDirDownward -> assert(UPWARD(no))
-        		fi;
+		/*ASSERTION*/
+		// check whether the car is travelling in the correct direction
+		if :: isDirDownward  -> assert(DOWNWARD(no))
+			:: !isDirDownward -> assert(UPWARD(no))
+		fi;
 
 		/*LEAVE*/
 		isDownward = DOWNWARD(no);
