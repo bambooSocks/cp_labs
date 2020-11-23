@@ -31,7 +31,7 @@ class Conductor extends Thread {
 
     private boolean inAlley = false;
     boolean isRunning = true;
-    private boolean leftOldPos = false, enteredNewPos = false, updatedCurPos = false;
+    private boolean isDriving = false;
 
     public Conductor(int no, CarDisplayI cd, Gate g, Field field, Alley alley, Barrier barrier) {
 
@@ -107,25 +107,26 @@ class Conductor extends Thread {
             while (isRunning) {
 
                 if (atGate(curpos)) {
-                    mygate.pass();
+                    mygate.pass();  // can throw
                     car.setSpeed(chooseSpeed());
                 }
 
                 newpos = nextPos(curpos);
 
-                if (atBarrier(curpos)) barrier.sync(no);
+                if (atBarrier(curpos)) barrier.sync(no); // can throw
 
                 if (atEntry(curpos)) {
-                    alley.enter(no);
+                    alley.enter(no);  // can throw
                     inAlley = true;
                 }
-                enteredNewPos = true;
-                field.enter(no, newpos);
 
-                car.driveTo(newpos);
+                field.enter(no, newpos); // can throw
+
+                isDriving = true;
+                car.driveTo(newpos); // can throw
+                isDriving = false;
 
                 field.leave(curpos);
-                leftOldPos = true;
 
                 if (atExit(newpos)) {
                     alley.leave(no);
@@ -133,26 +134,20 @@ class Conductor extends Thread {
                 }
 
                 curpos = newpos;
-                updatedCurPos = true;
 
                 if (isInterrupted()) {
                     throw new InterruptedException();
                 }
-                leftOldPos = false;
-                enteredNewPos = false;
-                updatedCurPos = false;
             }
 
         } catch (InterruptedException e) {
             if (inAlley) {
                 alley.leave(no);
             }
-            if (enteredNewPos) {
-                field.leave(updatedCurPos ? curpos : newpos);
+            if (isDriving) {
+                field.leave(newpos);
             }
-            if (!leftOldPos) {
-                field.leave(curpos);
-            }
+            field.leave(curpos);
             isRunning = false;
             cd.deregister(car);
         } catch (Exception e) {
