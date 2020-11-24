@@ -42,10 +42,11 @@ public class Alley {
         boolean isDirDownward = no < 5;
         counterMutex.P();
         // If there are cars from the opposite direction then wait
-        if((isDirDownward && upwardCars != 0) || (!isDirDownward && downwardCars != 0)) {
+        while((isDirDownward && upwardCars != 0) || (!isDirDownward && downwardCars != 0)) {
             carSemValueBelow0[carIndex] = true;
             counterMutex.V();  
             carSem[carIndex].P();
+            counterMutex.P();
         }
         // Increment corresponding counters
         if(isDirDownward) {
@@ -55,38 +56,18 @@ public class Alley {
         }
         counterMutex.V();  
 
-        // if(isDirDownward && upwardCars == 0) {
-        //     downwardCars ++;
-        //     counterMutex.V();  
-        // } else if(!isDirDownward && downwardCars ==0) {
-        //     upwardCars ++;
-        //     counterMutex.V();  
-        // } else {
-        //     carSemValueBelow0[carIndex] = true;
-        //     counterMutex.V();  
-        //     carSem[carIndex].P();
-            
-        //     counterMutex.P();
-        //     if (isDirDownward) {
-        //         downwardCars ++;
-        //     } else {
-        //         upwardCars ++;
-        //     }
-        //     counterMutex.V();
-        // }
-         
-
     }
 
-    /* Register that car no. has left the alley */
     public void leave(int no) throws InterruptedException {
         boolean isDirDownward = no < 5;
         counterMutex.P();
+        // update the counter
         if (isDirDownward) {
             downwardCars --;
         } else {
             upwardCars --;
         }
+        // if the alley is available then wake up waiting cars
         if((downwardCars == 0 && isDirDownward) || (!isDirDownward && upwardCars == 0)) {
             for(int i = 0; i<carSem.length; i++) {
                 if(carSemValueBelow0[i]) {
