@@ -15,10 +15,6 @@ public class Alley {
     Boolean[] carSemValueBelow0;
     int upwardCars = 0;
     int downwardCars = 0;
-    boolean isDirDownward = true;
-    boolean isAlleyAvailable = true;
-    int counter = 0;
-
 
     public Alley() {
         carSem = new Semaphore[8];
@@ -44,34 +40,42 @@ public class Alley {
     public void enter(int no) throws InterruptedException {
         int carIndex = no-1;
         boolean isDirDownward = no < 5;
-
         counterMutex.P();
-        if(!isAlleyAvailable) {
-            if((isDirDownward && downwardCars == 0) || (!isDirDownward && upwardCars == 0)) {
-                carSemValueBelow0[carIndex] = true;
-                carSem[carIndex].P();
-                carSemValueBelow0[carIndex] = true;
-            } else if(isDirDownward) {
-                downwardCars ++;
-            } else {
-                upwardCars ++;
-            } 
+        // If there are cars from the opposite direction then wait
+        if((isDirDownward && upwardCars != 0) || (!isDirDownward && downwardCars != 0)) {
+            carSemValueBelow0[carIndex] = true;
+            counterMutex.V();  
+            carSem[carIndex].P();
         }
-        counterMutex.V();
+        // Increment corresponding counters
+        if(isDirDownward) {
+            downwardCars++;
+        } else if(!isDirDownward) {
+            upwardCars++;
+        }
+        counterMutex.V();  
 
-        //first round case
-        counterMutex.P();
-        if(isAlleyAvailable) {
-            if (isDirDownward) {
-                downwardCars ++;
-            } else {
-                upwardCars ++;
-            }
-            isAlleyAvailable = false;
-        }
-        counterMutex.V();      
-        
-        System.out.println("upwardcars:"+upwardCars+"downwardCars:" + downwardCars);
+        // if(isDirDownward && upwardCars == 0) {
+        //     downwardCars ++;
+        //     counterMutex.V();  
+        // } else if(!isDirDownward && downwardCars ==0) {
+        //     upwardCars ++;
+        //     counterMutex.V();  
+        // } else {
+        //     carSemValueBelow0[carIndex] = true;
+        //     counterMutex.V();  
+        //     carSem[carIndex].P();
+            
+        //     counterMutex.P();
+        //     if (isDirDownward) {
+        //         downwardCars ++;
+        //     } else {
+        //         upwardCars ++;
+        //     }
+        //     counterMutex.V();
+        // }
+         
+
     }
 
     /* Register that car no. has left the alley */
@@ -83,17 +87,12 @@ public class Alley {
         } else {
             upwardCars --;
         }
-        if(downwardCars == 0 || upwardCars == 0) {
-            int waitedCars = 0;
+        if((downwardCars == 0 && isDirDownward) || (!isDirDownward && upwardCars == 0)) {
             for(int i = 0; i<carSem.length; i++) {
-                if(carSemValueBelow0[i] == true) {
-                    waitedCars ++;
-                    carSem[i].V();
+                if(carSemValueBelow0[i]) {
                     carSemValueBelow0[i] = false;
+                    carSem[i].V();
                 }
-            }
-            if(waitedCars == 0) {
-                isAlleyAvailable = true;
             }
         }
         counterMutex.V();
