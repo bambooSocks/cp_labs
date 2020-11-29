@@ -1,6 +1,7 @@
 package ringBuffer
 
 import (
+	"fmt"
 	"sync"
 	"sync/atomic"
 )
@@ -62,8 +63,10 @@ func (rb *RingBuffer) Produce(item interface{}) bool {
 	rb.prodMutex.Lock()
 	defer rb.prodMutex.Unlock()
 
+	fmt.Println(rb.Size(), rb.Capacity())
+
 	if rb.Size() >= rb.Capacity() {
-		for rb.Size() <= (rb.Capacity() - 1) {
+		for rb.Size() >= (rb.Capacity() - 1) {
 			<-rb.items
 			atomic.AddInt32(&rb.size, -1)
 		}
