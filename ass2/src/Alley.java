@@ -1,3 +1,7 @@
+import java.io.Console;
+import java.util.ArrayList;
+import java.util.List;
+
 //Prototype implementation of Alley class
 //Mandatory assignment 2
 //Course 02158 Concurrent Programming, DTU, Fall 2020
@@ -6,17 +10,20 @@
 
 public class Alley {
 
-    Semaphore alleyMutex, counterMutex, downwardsMutex, isFirstMutex, dirMutex;
-    boolean isDirDownward = false;
-    boolean isFirst = true;
-    int counter = 0;
+    Semaphore counterMutex;
+    Semaphore[] carSem;
+    Boolean[] carSemValueBelow0;
+    int upwardCars = 0;
+    int downwardCars = 0;
 
     public Alley() {
-        downwardsMutex = new Semaphore(1);
-        alleyMutex = new Semaphore(1);
+        carSem = new Semaphore[8];
+        carSemValueBelow0 = new Boolean[8];
+        for(int i = 0; i<carSem.length; i++) {
+            carSem[i] = new Semaphore(0);
+            carSemValueBelow0[i] = false;
+        }
         counterMutex = new Semaphore(1);
-        isFirstMutex = new Semaphore(1);
-        dirMutex = new Semaphore(1);
     }
 
     /* Determine whether pos is right before alley is entered */
@@ -31,52 +38,45 @@ public class Alley {
 
     /* Block until car no. may enter alley */
     public void enter(int no) throws InterruptedException {
-        if (no != 0) {
-            boolean isDownward = no < 5;
-            dirMutex.P();
-            boolean isOppositeDir = isDownward != isDirDownward;
-            dirMutex.V();
-            if(isOppositeDir) {
-                isFirstMutex.P();
-                boolean isFirstDownwards = isFirst && isDownward;
-                if (isFirstDownwards) isFirst = false;
-                isFirstMutex.V();
-                if (isFirstDownwards) {
-                    downwardsMutex.P();
-                    alleyMutex.P();
-                    downwardsMutex.V();
-                } else if (no < 5) {
-                    downwardsMutex.P();
-                    downwardsMutex.V();
-                } else {
-                    alleyMutex.P();
-                }
-                dirMutex.P();
-                isDirDownward = isDownward;
-                dirMutex.V();
-            } 
+        int carIndex = no-1;
+        boolean isDirDownward = no < 5;
+        counterMutex.P();
+        // If there are cars from the opposite direction then wait
+        while((isDirDownward && upwardCars != 0) || (!isDirDownward && downwardCars != 0)) {
+            carSemValueBelow0[carIndex] = true;
+            counterMutex.V();  
+            carSem[carIndex].P();
             counterMutex.P();
-            counter++;
-            counterMutex.V();
         }
+        // Increment corresponding counters
+        if(isDirDownward) {
+            downwardCars++;
+        } else if(!isDirDownward) {
+            upwardCars++;
+        }
+        counterMutex.V();  
+
     }
 
-    /* Register that car no. has left the alley */
     public void leave(int no) throws InterruptedException {
-        if (no != 0) {
-            boolean isDownward = no < 5;
-            counterMutex.P();
-            counter--;
-            if (counter == 0) {
-                alleyMutex.V();
-                if (isDownward) {
-                    isFirstMutex.P();
-                    isFirst = true;
-                    isFirstMutex.V();
+        boolean isDirDownward = no < 5;
+        counterMutex.P();
+        // update the counter
+        if (isDirDownward) {
+            downwardCars --;
+        } else {
+            upwardCars --;
+        }
+        // if the alley is available then wake up waiting cars
+        if((downwardCars == 0 && isDirDownward) || (!isDirDownward && upwardCars == 0)) {
+            for(int i = 0; i<carSem.length; i++) {
+                if(carSemValueBelow0[i]) {
+                    carSemValueBelow0[i] = false;
+                    carSem[i].V();
                 }
             }
-            counterMutex.V();
         }
+        counterMutex.V();
     }
 
 }
