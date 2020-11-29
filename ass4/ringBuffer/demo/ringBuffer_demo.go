@@ -8,12 +8,12 @@ package main
 
 import (
 	"fmt"
-	"queue"
+	"ringBuffer"
 )
 
 func main() {
 
-	q := queue.NewBoundedQueue(3, func(item interface{}) { fmt.Println("dropped", item) })
+	q := ringBuffer.NewRingBuffer(3, nil)
 
 	q.Produce("A")
 	q.Produce("B")
