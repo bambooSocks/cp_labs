@@ -60,7 +60,6 @@ func (rb *RingBuffer) Produce(item interface{}) bool {
 	}
 
 	rb.prodMutex.Lock()
-	defer rb.prodMutex.Unlock()
 
 	if rb.Size() >= rb.Capacity() {
 		for rb.Size() >= (rb.Capacity() - 1) {
@@ -68,6 +67,8 @@ func (rb *RingBuffer) Produce(item interface{}) bool {
 			atomic.AddInt32(&rb.size, -1)
 		}
 	}
+
+	rb.prodMutex.Unlock()
 
 	select {
 	case rb.items <- item:
